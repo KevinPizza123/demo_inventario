@@ -70,16 +70,6 @@ def create_tables():
 # Crea las tablas al inicio de la aplicación
 with app.app_context():
     create_tables()
-# Panel de control
-@app.route('/dashboard')
-def dashboard():
-    if 'vendedor_id' not in session:
-        return redirect(url_for('login'))
-    if session['es_admin']:
-        return redirect(url_for('admin_dashboard'))
-    else:
-        return redirect(url_for('vendedor_dashboard'))
-
 
 UPLOAD_FOLDER = 'static/images'  # Carpeta para guardar imágenes
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+    {% block title %}Panel de Control del Administrador{% endblock %}
+
+    {% block content %}
+    <div class="container">
+        <h1>Panel de Control del Administrador</h1>
+        <p>Bienvenido, {{ current_user.nombre }}!</p>
+
+        <h2>Acciones Rápidas</h2>
+        <ul>
+            <li><a href="{{ url_for('admin_usuarios') }}">Gestionar Usuarios</a></li>
+            <li><a href="{{ url_for('admin_locales') }}">Gestionar Locales</a></li>
+            <li><a href="{{ url_for('admin_productos') }}">Gestionar Productos</a></li>
+            <li><a href="{{ url_for('inventario') }}">Gestionar Inventario</a></li>
+            <li><a href="{{ url_for('proveedores') }}">Gestionar Proveedores</a></li>
+            <li><a href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
+        </ul>
+
+        <h2>Estadísticas</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Usuarios Registrados</h5>
+                        <p class="card-text">Total: {{ total_usuarios }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Locales Activos</h5>
+                        <p class="card-text">Total: {{ total_locales }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Productos en Stock</h5>
+                        <p class="card-text">Total: {{ total_productos }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

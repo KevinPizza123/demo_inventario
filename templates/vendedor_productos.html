@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+    {% block title %}Visualización de Productos{% endblock %}
+
+    {% block content %}
+    <div class="container">
+        <h1>Visualización de Productos</h1>
+        <input type="text" id="busqueda" placeholder="Buscar productos...">
+        <div id="resultados"></div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto.id }}</td>
+                    <td>{{ producto.nombre }}</td>
+                    <td>{{ producto.precio }}</td>
+                    <td>{{ producto.stock }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+        <script>
+            document.getElementById('busqueda').addEventListener('input', function() {
+                let query = this.value;
+                fetch('/buscar_productos?query=' + query)
+                    .then(response => response.json())
+                    .then(data => {
+                        let resultados = document.getElementById('resultados');
+                        resultados.innerHTML = '';
+                        data.forEach(producto => {
+                            resultados.innerHTML += '<p>' + producto.Nombre + '</p>';
+                        });
+                });
+        });
+    </script>
+    </div>
+    {% endblock %}

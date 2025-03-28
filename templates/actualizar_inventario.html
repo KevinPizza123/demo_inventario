@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Actualizar Inventario{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Actualizar Inventario</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="stock">Stock actual: {{ producto[2] }}</label>
+                <input type="number" name="stock" value="{{ producto[2] }}" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+        </form>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+    </div>
+{% endblock %}

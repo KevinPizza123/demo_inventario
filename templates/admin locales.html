@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+    {% block title %}Gestión de Locales{% endblock %}
+
+    {% block content %}
+    <div class="container">
+        <h1>Gestión de Locales</h1>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for local in locales %}
+                <tr>
+                    <td>{{ local.id }}</td>
+                    <td>{{ local.nombre }}</td>
+                    <td>{{ local.direccion }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_local', id=local.id) }}" class="btn btn-sm btn-primary">Editar</a>
+                        <a href="{{ url_for('eliminar_local', id=local.id) }}" class="btn btn-sm btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+        </table>
+
+        <a href="{{ url_for('agregar_local') }}" class="btn btn-success">Agregar Local</a>
+    </div>
+    {% endblock %}

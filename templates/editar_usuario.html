@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Editar Usuario</h1>
+    <form method="POST" action="{{ url_for('editar_usuario', id=usuario[0]) }}">
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ usuario[1] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="apellido">Apellido:</label>
+            <input type="text" class="form-control" id="apellido" name="apellido" value="{{ usuario[2] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="correo">Correo:</label>
+            <input type="email" class="form-control" id="correo" name="correo" value="{{ usuario[3] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="rol">Rol:</label>
+            <select class="form-control" id="rol" name="rol" required>
+                <option value="admin" {% if usuario[4] == 'admin' %}selected{% endif %}>Admin</option>
+                <option value="vendedor" {% if usuario[4] == 'vendedor' %}selected{% endif %}>Vendedor</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="local_id">Local:</label>
+            <select class="form-control" id="local_id" name="local_id" required>
+                {% for local in locales %}
+                    <option value="{{ local[0] }}" {% if usuario[6] == local[0] %}selected{% endif %}>{{ local[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="contrasena">Contraseña (dejar en blanco para no cambiar):</label>
+            <input type="password" class="form-control" id="contrasena" name="contrasena">
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        <a href="{{ url_for('admin_usuarios') }}" class="btn btn-secondary">Volver a Usuarios</a>
+    </form>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+</div>
+{% endblock %}

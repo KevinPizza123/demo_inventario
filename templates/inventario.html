@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventario{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Inventario</h1>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Stock</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto[0] }}</td>
+                    <td>{{ producto[1] }}</td>
+                    <td>{{ producto[2] }}</td>
+                    <td><a href="{{ url_for('actualizar_inventario', id=producto[0]) }}" class="btn btn-sm btn-primary">Actualizar</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+        </table>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+    </div>
+{% endblock %}

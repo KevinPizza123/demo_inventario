@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Local{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Editar Local</h1>
+    <form method="POST" action="{{ url_for('editar_local', id=local[0]) }}">
+        <div class="form-group">
+            <label for="nombre">Nombre:</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ local[1] }}" required>
+        </div>
+        <div class="form-group">
+            <label for="direccion">Dirección:</label>
+            <input type="text" class="form-control" id="direccion" name="direccion" value="{{ local[2] }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+</div>
+{% endblock %}

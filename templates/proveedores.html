@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Proveedores{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>Proveedores</h1>
+        <a href="{{ url_for('agregar_proveedor') }}" class="btn btn-success mb-3">Agregar Proveedor</a>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Contacto</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proveedor in proveedores %}
+                <tr>
+                    <td>{{ proveedor[0] }}</td>
+                    <td>{{ proveedor[1] }}</td>
+                    <td>{{ proveedor[2] }}</td>
+                    <td>{{ proveedor[3] }}</td>
+                    <td>{{ proveedor[4] }}</td>
+                    <td>
+                        <a href="{{ url_for('actualizar_proveedor', id=proveedor[0]) }}" class="btn btn-sm btn-primary">Actualizar</a>
+                        <form method="POST" action="{{ url_for('eliminar_proveedor', id=proveedor[0]) }}" style="display: inline-block;">
+                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+    </div>
+{% endblock %}

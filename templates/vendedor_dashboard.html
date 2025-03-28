@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+    {% block title %}Panel de Control del Vendedor{% endblock %}
+
+    {% block content %}
+    <div class="container">
+        <h1>Panel de Control del Vendedor</h1>
+        <p>Bienvenido, {{ current_user.nombre }}!</p>
+
+        <h2>Acciones Rápidas</h2>
+        <ul>
+            <li><a href="{{ url_for('vendedor_productos') }}">Ver Productos</a></li>
+            <li><a href="{{ url_for('vendedor_agregar_producto') }}">Agregar Productos</a></li>
+            <li><a href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
+        </ul>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
+    </div>
+    {% endblock %}

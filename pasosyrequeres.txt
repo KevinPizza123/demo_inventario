@@ -43,7 +43,7 @@ cantidad
 edit trae
 pvpunitario trae el pvpmayorista , el pvpmayorista trae la cantidad y la cantidad trae el pvp unitario 
 
-
+pip freeze > requirements.txt
 usuario admin : 
 'Miguel',
         'Coyago',

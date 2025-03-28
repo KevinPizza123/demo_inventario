@@ -1,4 +1,3 @@
-import io
 from tkinter.font import Font
 import bcrypt
 import openpyxl
@@ -9,15 +8,14 @@ from werkzeug.utils import secure_filename
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle  # Importación corregida
-from reportlab.pdfgen import canvas
 from flask import Flask, jsonify, render_template, request, redirect, send_file, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email, EqualTo
 from werkzeug.security import generate_password_hash, check_password_hash
 import psycopg2
-import requests
+
 
 load_dotenv()
 

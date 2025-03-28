@@ -10,7 +10,7 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle  # Importación corregida
 from reportlab.pdfgen import canvas
-from flask import Flask, jsonify, render_template, request, redirect, send_file, url_for, flash
+from flask import Flask, jsonify, render_template, request, redirect, send_file, session, url_for, flash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, PasswordField, SubmitField
@@ -22,9 +22,9 @@ import requests
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY')
+#app.secret_key = os.environ.get('SECRET_KEY')
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+#DATABASE_URL = os.environ.get('DATABASE_URL')
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -32,6 +32,54 @@ login_manager.login_view = 'admin_login'
 def get_db_connection():
     conn = psycopg2.connect(DATABASE_URL)
     return conn
+
+#render bdd
+app.secret_key = os.environ.get('SECRET_KEY')
+
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+def get_db_connection():
+    conn = psycopg2.connect(DATABASE_URL)
+    return conn
+
+def create_tables():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Nombres de las tablas que deseas verificar
+    tablas = ['Locales', 'Usuarios', 'Productos', 'Inventario', 'Proveedores']
+
+    # Verificar si cada tabla existe
+    table_exists = True
+    for tabla in tablas:
+        cur.execute(f"SELECT to_regclass('{tabla}');")
+        result = cur.fetchone()
+        if result is None or result[0] is None:
+            table_exists = False
+            break
+
+    # Si alguna tabla no existe, ejecutar el script schema.sql
+    if not table_exists:
+        with open('schema.sql', 'r') as f:
+            cur.execute(f.read())
+        conn.commit()
+
+    cur.close()
+    conn.close()
+
+# Crea las tablas al inicio de la aplicación
+with app.app_context():
+    create_tables()
+# Panel de control
+@app.route('/dashboard')
+def dashboard():
+    if 'vendedor_id' not in session:
+        return redirect(url_for('login'))
+    if session['es_admin']:
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return redirect(url_for('vendedor_dashboard'))
+
 
 UPLOAD_FOLDER = 'static/images'  # Carpeta para guardar imágenes
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}

@@ -5,6 +5,7 @@
 {% block content %}
 <div class="container">
     <h1>Gestión de Productos</h1>
+    <input type="text" id="busqueda" placeholder="Buscar producto..." oninput="buscarProductos()">
     <table class="table">
         <thead>
             <tr>
@@ -17,7 +18,7 @@
                 <th>Acciones</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="resultados">
             {% for producto in productos %}
             <tr>
                 <td>{{ producto[0] }}</td>
@@ -27,10 +28,10 @@
                 <td>{{ producto[3] }}</td>
                 <td>
                     {% if producto[5] %}
-        <img src="{{ url_for('static', filename='images/' + producto[5]) }}" alt="Imagen del producto" style="max-width: 100px;">
-    {% else %}
-        Sin imagen
-    {% endif %}
+                    <img src="{{ url_for('static', filename='images/' + producto[5]) }}" alt="Imagen del producto" style="max-width: 100px;">
+                    {% else %}
+                    Sin imagen
+                    {% endif %}
                 </td>
                 <td>
                     <a href="{{ url_for('editar_producto', id=producto[0]) }}" class="btn btn-sm btn-primary">Editar</a>
@@ -43,4 +44,25 @@
     </table>
     <a href="{{ url_for('agregar_producto') }}" class="btn btn-success">Agregar Producto</a>
 </div>
+
+<script>
+    function buscarProductos() {
+        let busqueda = document.getElementById('busqueda').value.toLowerCase();
+        let tabla = document.getElementById('resultados');
+        let filas = tabla.getElementsByTagName('tr');
+
+        for (let i = 0; i < filas.length; i++) {
+            let nombre = filas[i].getElementsByTagName('td')[1].textContent.toLowerCase();
+            let descripcion = filas[i].getElementsByTagName('td')[6].textContent.toLowerCase();
+            let precio = filas[i].getElementsByTagName('td')[2].textContent.toLowerCase();
+            let stock = filas[i].getElementsByTagName('td')[3].textContent.toLowerCase();
+
+            if (nombre.includes(busqueda) || descripcion.includes(busqueda) || precio.includes(busqueda) || stock.includes(busqueda)) {
+                filas[i].style.display = '';
+            } else {
+                filas[i].style.display = 'none';
+            }
+        }
+    }
+</script>
 {% endblock %}

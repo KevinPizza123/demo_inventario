@@ -23,8 +23,13 @@
     Precio DECIMAL NOT NULL,
     Stock INTEGER NOT NULL,
     LocalID INTEGER REFERENCES Locales(ID),
-    Imagen VARCHAR(255),
     Descripcion TEXT -- Columna Descripción agregada
+);
+
+CREATE TABLE Imagenes (
+    ID SERIAL PRIMARY KEY,
+    NombreArchivo VARCHAR(255) NOT NULL,
+    ProductoID INT REFERENCES Productos(ID)
 );
 
     -- Tabla Inventario
@@ -45,6 +50,8 @@
         Telefono VARCHAR(255) NOT NULL,
         Correo VARCHAR(255)
     );
+
+
 
     -- Insertar usuario admin (miguel25@gmail.com)
     INSERT INTO Usuarios (Nombre, Apellido, Correo, Contrasena, Rol, LocalID)

@@ -22,6 +22,8 @@ python -m venv venv
 ACTIVAR ENTORNO 
 venv\Scripts\activate
 INSTALAR DEPENDENCIAS A USAR EN EL PROYETO
+si ya se tiene el requemients.txt 
+pip install -r requirements.txt
 pip install Flask psycopg2-binary python-dotenv
 Jinja2 para datos dinamicos desde el server 
 static/images ( carpeta para imagenes )

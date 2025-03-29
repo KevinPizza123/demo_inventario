@@ -3,31 +3,38 @@
 {% block title %}Agregar Producto{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Agregar Producto</h1>
-    <form method="POST" action="{{ url_for('agregar_producto') }}" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="nombre">Nombre:</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" required>
-        </div>
-        <div class="form-group">
-            <label for="descripcion">Descripción:</label>
-            <textarea class="form-control" id="descripcion" name="descripcion" required></textarea>
-        </div>
-        <div class="form-group">
-            <label for="precio">Precio:</label>
-            <input type="number" class="form-control" id="precio" name="precio" required>
-        </div>
-        <div class="form-group">
-            <label for="stock">Stock:</label>
-            <input type="number" class="form-control" id="stock" name="stock" required>
-        </div>
-        <div class="form-group">
-            <label for="imagen">Imagen:</label>
-            <input type="file" class="form-control-file" id="imagen" name="imagen">
-        </div>
-        <button type="submit" class="btn btn-primary">Agregar</button>
-    </form>
-    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
-</div>
+    <div class="container">
+        <h1>Agregar Producto</h1>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" name="nombre" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="precio">Precio:</label>
+                <input type="number" name="precio" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="stock">Stock:</label>
+                <input type="number" name="stock" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="local_id">Local:</label>
+                <select name="local_id" class="form-control">
+                    {% for local in locales %}
+                    <option value="{{ local[0] }}">{{ local[1] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <textarea name="descripcion" class="form-control"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="imagen">Imagen:</label>
+                <input type="file" name="imagen" class="form-control-file">
+            </div>
+            <button type="submit" class="btn btn-success">Agregar</button>
+        </form>
+    </div>
 {% endblock %}

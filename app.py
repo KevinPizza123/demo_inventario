@@ -550,55 +550,53 @@ def admin_productos():
         return redirect(url_for('dashboard'))
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM Productos;')
+    cur.execute('''
+        SELECT Productos.ID, Productos.Nombre, Productos.Precio, Productos.Stock, Locales.Nombre, Imagenes.NombreArchivo, Productos.Descripcion
+        FROM Productos
+        LEFT JOIN Imagenes ON Productos.ID = Imagenes.ProductoID
+        LEFT JOIN Locales ON Productos.LocalID = Locales.ID;
+    ''')
     productos = cur.fetchall()
     cur.close()
     conn.close()
-    # Reemplaza las barras invertidas por barras diagonales en las rutas de las imágenes
-    productos_con_rutas_corregidas = []
-    for producto in productos:
-        producto_lista = list(producto)
-        if producto_lista[5]:
-            # Extrae el nombre del archivo de la ruta completa
-            nombre_archivo = os.path.basename(producto_lista[5])
-            producto_lista[5] = nombre_archivo
-        productos_con_rutas_corregidas.append(tuple(producto_lista))
-    return render_template('admin_productos.html', productos=productos_con_rutas_corregidas)
+    return render_template('admin_productos.html', productos=productos)
 
 @app.route('/admin/productos/agregar', methods=['GET', 'POST'])
 @login_required
 def agregar_producto():
     if current_user.rol != 'admin':
         return redirect(url_for('dashboard'))
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute('SELECT ID, Nombre FROM Locales;')
+    locales = cur.fetchall()
     if request.method == 'POST':
-        print(f"Datos del formulario: {request.form}") # Imprime los datos del formulario
         nombre = request.form['nombre']
-        descripcion = request.form['descripcion']
         precio = request.form['precio']
         stock = request.form['stock']
+        local_id = request.form['local_id']
+        descripcion = request.form['descripcion']
         imagen = request.files['imagen']
         if imagen and allowed_file(imagen.filename):
             filename = secure_filename(imagen.filename)
             imagen.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            imagen_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            print(f"Ruta de la imagen: {imagen_path}") # Imprime la ruta de la imagen
+            imagen_path = filename
         else:
             imagen_path = None
-        conn = get_db_connection()
-        cur = conn.cursor()
         try:
-            cur.execute('INSERT INTO Productos (Nombre, Descripcion, Precio, Stock, Imagen) VALUES (%s, %s, %s, %s, %s);', (nombre, descripcion, precio, stock, imagen_path))
+            cur.execute('INSERT INTO Productos (Nombre, Precio, Stock, LocalID, Descripcion) VALUES (%s, %s, %s, %s, %s) RETURNING ID;', (nombre, precio, stock, local_id, descripcion))
+            producto_id = cur.fetchone()[0]
+            if imagen_path:
+                cur.execute('INSERT INTO Imagenes (NombreArchivo, ProductoID) VALUES (%s, %s);', (imagen_path, producto_id))
             conn.commit()
-            print("Producto insertado en la base de datos") # Imprime un mensaje de éxito
-            flash('Producto agregado exitosamente', 'success')
+            flash('Producto agregado correctamente.', 'success')
             return redirect(url_for('admin_productos'))
         except psycopg2.Error as e:
-            print(f"Error de la base de datos: {e}") # Imprime el error de la base de datos
             flash(f'Error al agregar producto: {e}', 'danger')
         finally:
             cur.close()
             conn.close()
-    return render_template('agregar_producto.html')
+    return render_template('agregar_producto.html', locales=locales)
 
 @app.route('/admin/productos/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -607,37 +605,45 @@ def editar_producto(id):
         return redirect(url_for('dashboard'))
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM Productos WHERE ID = %s;', (id,))
-    producto = cur.fetchone()
-    cur.close()
-    conn.close()
+    cur.execute('SELECT ID, Nombre FROM Locales;')
+    locales = cur.fetchall()
     if request.method == 'POST':
         nombre = request.form['nombre']
-        descripcion = request.form['descripcion']
         precio = request.form['precio']
         stock = request.form['stock']
+        local_id = request.form['local_id']
+        descripcion = request.form['descripcion']
         imagen = request.files['imagen']
         if imagen and allowed_file(imagen.filename):
             filename = secure_filename(imagen.filename)
             imagen.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            imagen_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            imagen_path = filename
         else:
-            imagen_path = producto[5]
-        conn = get_db_connection()
-        cur = conn.cursor()
+            imagen_path = None
         try:
-            cur.execute('UPDATE Productos SET Nombre = %s, Descripcion = %s, Precio = %s, Stock = %s, Imagen = %s WHERE ID = %s;', (nombre, descripcion, precio, stock, imagen_path, id))
+            cur.execute('UPDATE Productos SET Nombre = %s, Precio = %s, Stock = %s, LocalID = %s, Descripcion = %s WHERE ID = %s;', (nombre, precio, stock, local_id, descripcion, id))
+            if imagen_path:
+                cur.execute('UPDATE Imagenes SET NombreArchivo = %s WHERE ProductoID = %s;', (imagen_path, id))
             conn.commit()
-            flash('Producto editado exitosamente', 'success')
+            flash('Producto actualizado correctamente.', 'success')
             return redirect(url_for('admin_productos'))
         except psycopg2.Error as e:
-            flash(f'Error al editar producto: {e}', 'danger')
+            flash(f'Error al actualizar producto: {e}', 'danger')
         finally:
             cur.close()
             conn.close()
-    return render_template('editar_producto.html', producto=producto)
+    cur.execute('''
+        SELECT Productos.ID, Productos.Nombre, Productos.Precio, Productos.Stock, Productos.LocalID, Imagenes.NombreArchivo, Productos.Descripcion
+        FROM Productos
+        LEFT JOIN Imagenes ON Productos.ID = Imagenes.ProductoID
+        WHERE Productos.ID = %s;
+    ''', (id,))
+    producto = cur.fetchone()
+    cur.close()
+    conn.close()
+    return render_template('editar_producto.html', producto=producto, locales=locales)
 
-@app.route('/admin/productos/eliminar/<int:id>')
+@app.route('/admin/productos/eliminar/<int:id>', methods=['POST'])
 @login_required
 def eliminar_producto(id):
     if current_user.rol != 'admin':
@@ -645,9 +651,10 @@ def eliminar_producto(id):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
+        cur.execute('DELETE FROM Imagenes WHERE ProductoID = %s;', (id,))
         cur.execute('DELETE FROM Productos WHERE ID = %s;', (id,))
         conn.commit()
-        flash('Producto eliminado exitosamente', 'success')
+        flash('Producto eliminado correctamente.', 'success')
     except psycopg2.Error as e:
         flash(f'Error al eliminar producto: {e}', 'danger')
     finally:

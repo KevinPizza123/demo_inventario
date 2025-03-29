@@ -1,68 +1,49 @@
 {% extends 'base.html' %}
 
-{% block title %}Gestión de Productos{% endblock %}
+{% block title %}Productos{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Gestión de Productos</h1>
-    <input type="text" id="busqueda" placeholder="Buscar producto..." oninput="buscarProductos()">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Imagen</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="resultados">
-            {% for producto in productos %}
-            <tr>
-                <td>{{ producto[0] }}</td>
-                <td>{{ producto[1] }}</td>
-                <td>{{ producto[6] }}</td>
-                <td>{{ producto[2] }}</td>
-                <td>{{ producto[3] }}</td>
-                <td>
-                    {% if producto[5] %}
-                    <img src="{{ url_for('static', filename='images/' + producto[5]) }}" alt="Imagen del producto" style="max-width: 100px;">
-                    {% else %}
-                    Sin imagen
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{{ url_for('editar_producto', id=producto[0]) }}" class="btn btn-sm btn-primary">Editar</a>
-                    <a href="{{ url_for('eliminar_producto', id=producto[0]) }}" class="btn btn-sm btn-danger">Eliminar</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary mt-3">Volver al Dashboard</a>
-    </table>
-    <a href="{{ url_for('agregar_producto') }}" class="btn btn-success">Agregar Producto</a>
-</div>
-
-<script>
-    function buscarProductos() {
-        let busqueda = document.getElementById('busqueda').value.toLowerCase();
-        let tabla = document.getElementById('resultados');
-        let filas = tabla.getElementsByTagName('tr');
-
-        for (let i = 0; i < filas.length; i++) {
-            let nombre = filas[i].getElementsByTagName('td')[1].textContent.toLowerCase();
-            let descripcion = filas[i].getElementsByTagName('td')[6].textContent.toLowerCase();
-            let precio = filas[i].getElementsByTagName('td')[2].textContent.toLowerCase();
-            let stock = filas[i].getElementsByTagName('td')[3].textContent.toLowerCase();
-
-            if (nombre.includes(busqueda) || descripcion.includes(busqueda) || precio.includes(busqueda) || stock.includes(busqueda)) {
-                filas[i].style.display = '';
-            } else {
-                filas[i].style.display = 'none';
-            }
-        }
-    }
-</script>
+    <div class="container">
+        <h1>Productos</h1>
+        <a href="{{ url_for('agregar_producto') }}" class="btn btn-success mb-3">Agregar Producto</a>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Local</th>
+                    <th>Imagen</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto[0] }}</td>
+                    <td>{{ producto[1] }}</td>
+                    <td>{{ producto[2] }}</td>
+                    <td>{{ producto[3] }}</td>
+                    <td>{{ producto[4] }}</td>
+                    <td>
+                        {% if producto[5] %}
+                        <img src="{{ url_for('static', filename='images/' + producto[5]) }}" alt="Imagen del producto" style="max-width: 100px;">
+                        {% else %}
+                        Sin imagen
+                        {% endif %}
+                    </td>
+                    <td>{{ producto[6] }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_producto', id=producto[0]) }}" class="btn btn-sm btn-primary">Editar</a>
+                        <form method="POST" action="{{ url_for('eliminar_producto', id=producto[0]) }}" style="display: inline-block;">
+                            <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

@@ -1,6 +1,8 @@
 import io
 from tkinter.font import Font
 import bcrypt
+import cloudinary
+import cloudinary.uploader
 import openpyxl
 import psycopg2
 import os
@@ -561,11 +563,24 @@ def admin_productos():
     conn.close()
     return render_template('admin_productos.html', productos=productos)
 
+# Configuración de Cloudinary
+cloudinary.config(
+  cloud_name = os.environ.get('CLOUD_NAME'),
+  api_key = os.environ.get('API_KEY'),
+  api_secret = os.environ.get('API_SECRET')
+)
+
+def cargar_imagen_cloudinary(imagen):
+    try:
+        resultado = cloudinary.uploader.upload(imagen)
+        return resultado['secure_url']
+    except Exception as e:
+        print(f"Error al subir imagen a Cloudinary: {e}")
+        return None
+
 @app.route('/admin/productos/agregar', methods=['GET', 'POST'])
 @login_required
 def agregar_producto():
-    if current_user.rol != 'admin':
-        return redirect(url_for('dashboard'))
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('SELECT ID, Nombre FROM Locales;')
@@ -576,18 +591,12 @@ def agregar_producto():
         stock = request.form['stock']
         local_id = request.form['local_id']
         descripcion = request.form['descripcion']
-        imagen = request.files['imagen']
-        if imagen and allowed_file(imagen.filename):
-            filename = secure_filename(imagen.filename)
-            imagen.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            imagen_path = filename
-        else:
-            imagen_path = None
+        url_imagen = request.form['url_imagen'] # Obtiene la URL del campo de texto
         try:
             cur.execute('INSERT INTO Productos (Nombre, Precio, Stock, LocalID, Descripcion) VALUES (%s, %s, %s, %s, %s) RETURNING ID;', (nombre, precio, stock, local_id, descripcion))
             producto_id = cur.fetchone()[0]
-            if imagen_path:
-                cur.execute('INSERT INTO Imagenes (NombreArchivo, ProductoID) VALUES (%s, %s);', (imagen_path, producto_id))
+            if url_imagen:
+                cur.execute('INSERT INTO Imagenes (NombreArchivo, ProductoID) VALUES (%s, %s);', (url_imagen, producto_id))
             conn.commit()
             flash('Producto agregado correctamente.', 'success')
             return redirect(url_for('admin_productos'))
@@ -601,29 +610,24 @@ def agregar_producto():
 @app.route('/admin/productos/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
 def editar_producto(id):
-    if current_user.rol != 'admin':
-        return redirect(url_for('dashboard'))
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('SELECT ID, Nombre FROM Locales;')
     locales = cur.fetchall()
+    cur.execute('SELECT p.ID, p.Nombre, p.Precio, p.Stock, p.LocalID, i.NombreArchivo, p.Descripcion FROM Productos p LEFT JOIN Imagenes i ON p.ID = i.ProductoID WHERE p.ID = %s;', (id,))
+    producto = cur.fetchone()
     if request.method == 'POST':
         nombre = request.form['nombre']
         precio = request.form['precio']
         stock = request.form['stock']
         local_id = request.form['local_id']
         descripcion = request.form['descripcion']
-        imagen = request.files['imagen']
-        if imagen and allowed_file(imagen.filename):
-            filename = secure_filename(imagen.filename)
-            imagen.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            imagen_path = filename
-        else:
-            imagen_path = None
+        url_imagen = request.form['url_imagen'] # Obtiene la URL del campo de texto
         try:
             cur.execute('UPDATE Productos SET Nombre = %s, Precio = %s, Stock = %s, LocalID = %s, Descripcion = %s WHERE ID = %s;', (nombre, precio, stock, local_id, descripcion, id))
-            if imagen_path:
-                cur.execute('UPDATE Imagenes SET NombreArchivo = %s WHERE ProductoID = %s;', (imagen_path, id))
+            if url_imagen:
+                cur.execute('DELETE FROM Imagenes WHERE ProductoID = %s;', (id,))
+                cur.execute('INSERT INTO Imagenes (NombreArchivo, ProductoID) VALUES (%s, %s);', (url_imagen, id))
             conn.commit()
             flash('Producto actualizado correctamente.', 'success')
             return redirect(url_for('admin_productos'))
@@ -632,25 +636,19 @@ def editar_producto(id):
         finally:
             cur.close()
             conn.close()
-    cur.execute('''
-        SELECT Productos.ID, Productos.Nombre, Productos.Precio, Productos.Stock, Productos.LocalID, Imagenes.NombreArchivo, Productos.Descripcion
-        FROM Productos
-        LEFT JOIN Imagenes ON Productos.ID = Imagenes.ProductoID
-        WHERE Productos.ID = %s;
-    ''', (id,))
-    producto = cur.fetchone()
-    cur.close()
-    conn.close()
     return render_template('editar_producto.html', producto=producto, locales=locales)
 
 @app.route('/admin/productos/eliminar/<int:id>', methods=['POST'])
 @login_required
 def eliminar_producto(id):
-    if current_user.rol != 'admin':
-        return redirect(url_for('dashboard'))
     conn = get_db_connection()
     cur = conn.cursor()
     try:
+        cur.execute('SELECT NombreArchivo FROM Imagenes WHERE ProductoID = %s;', (id,))
+        imagen = cur.fetchone()
+        if imagen:
+            # Eliminar la imagen de Cloudinary
+            cloudinary.uploader.destroy(imagen[0].split('/')[-1].split('.')[0])
         cur.execute('DELETE FROM Imagenes WHERE ProductoID = %s;', (id,))
         cur.execute('DELETE FROM Productos WHERE ID = %s;', (id,))
         conn.commit()

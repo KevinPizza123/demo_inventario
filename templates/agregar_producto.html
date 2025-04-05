@@ -5,22 +5,22 @@
 {% block content %}
     <div class="container">
         <h1>Agregar Producto</h1>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST">
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
-                <input type="text" name="nombre" class="form-control" required>
+                <input type="text" name="nombre" id="nombre" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="precio">Precio:</label>
-                <input type="number" name="precio" class="form-control" required>
+                <input type="number" name="precio" id="precio" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="stock">Stock:</label>
-                <input type="number" name="stock" class="form-control" required>
+                <input type="number" name="stock" id="stock" class="form-control" required>
             </div>
             <div class="form-group">
                 <label for="local_id">Local:</label>
-                <select name="local_id" class="form-control">
+                <select name="local_id" id="local_id" class="form-control" required>
                     {% for local in locales %}
                     <option value="{{ local[0] }}">{{ local[1] }}</option>
                     {% endfor %}
@@ -28,11 +28,11 @@
             </div>
             <div class="form-group">
                 <label for="descripcion">Descripción:</label>
-                <textarea name="descripcion" class="form-control"></textarea>
+                <textarea name="descripcion" id="descripcion" class="form-control" required></textarea>
             </div>
             <div class="form-group">
-                <label for="imagen">Imagen:</label>
-                <input type="file" name="imagen" class="form-control-file">
+                <label for="url_imagen">URL de la imagen (Cloudinary):</label>
+                <input type="url" name="url_imagen" id="url_imagen" class="form-control">
             </div>
             <button type="submit" class="btn btn-success">Agregar</button>
         </form>

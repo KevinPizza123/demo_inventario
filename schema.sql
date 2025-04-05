@@ -52,6 +52,8 @@ CREATE TABLE Imagenes (
     );
 
 
+---actualizaar
+
 
     -- Insertar usuario admin (miguel25@gmail.com)
     INSERT INTO Usuarios (Nombre, Apellido, Correo, Contrasena, Rol, LocalID)
